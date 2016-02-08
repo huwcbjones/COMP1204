@@ -42,10 +42,15 @@
 \newpage
 
 \section{Scripts}
+
 \subsection{Count Reviews: Single File}
+
 \subsubsection{Source}
 \lstinputlisting{Q1/countreviews.sh}
+
+
 \subsubsection{Explanation}
+
 \begin{lstlisting}
 grep -c "<Author>" $1
 \end{lstlisting}
@@ -53,8 +58,48 @@ As every review has an author, it made sense to search for the ``\textless Autho
 Using the ``-c" argument for grep returns a search count, rather than the string of occurrences.
 ``\$1" is used to get the first (real) argument when the script is executed on the command line.
 
+
 \subsection{Count Reviews: Directory}
+
+\subsubsection{Source}
 \lstinputlisting{Q2/countreviews.sh}
+
+
+\subsubsection{Explanation}
+
+\begin{lstlisting}
+function reviewcount () {
+	grep -c "<Author>" $1
+}
+\end{lstlisting}
+I turned the count reviews into a function to use later.
+
+\begin{lstlisting}
+if [ -d $1 ]
+then
+
+...
+fi
+\end{lstlisting}
+This checks whether the argument passed was a directory, and if so, execute the appropriate code.
+
+\begin{lstlisting}
+for file in $1/*
+do
+	reviewcount $file
+done;
+\end{lstlisting}
+This section is executed if the argument passed as a directory.
+It iterates over the files in the directory, then calls the ``reviewcount" function for each file.
+
+\begin{lstlisting}
+else
+	reviewcount $1
+fi
+\end{lstlisting}
+This code is executed if the argument passed to the script is not a directory.
+It executes the ``reviewcount" as it should normally do for a file. \newline \newline
+This script works for both 3.1.1: 1 and 2.
 
 \subsection{Count Reviews: Sorted}
 \lstinputlisting{Q3/countreviews.sh}
