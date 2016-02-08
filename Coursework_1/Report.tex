@@ -75,11 +75,11 @@ Using the ``-c" argument for grep returns a search count, rather than the string
 \subsubsection{Explanation}
 
 \begin{lstlisting}
-function reviewcount () {
+function getReviewCount () {
 	grep -c "<Author>" $1
 }
 \end{lstlisting}
-I turned the count reviews into a function to use later.
+This function returns the number of reviews in a hotel data file.
 
 \begin{lstlisting}
 if [ -d $1 ]
@@ -93,19 +93,19 @@ This checks whether the argument passed was a directory, and if so, execute the 
 \begin{lstlisting}
 for file in $1/*
 do
-	reviewcount $file
+	getReviewCount $file
 done;
 \end{lstlisting}
 This section is executed if the argument passed as a directory.
-It iterates over the files in the directory, then calls the ``reviewcount" function for each file.
+It iterates over the files in the directory, then calls the ``getReviewCount" function for each file.
 
 \begin{lstlisting}
 else
-	reviewcount $1
+	getReviewCount $1
 fi
 \end{lstlisting}
 This code is executed if the argument passed to the script is not a directory.
-It executes the ``reviewcount" as it should normally do for a file. \newline \newline
+It executes the ``getReviewCount" as it should normally do for a file. \newline \newline
 This script works for both 3.1.1: 1 and 2.
 
 %	3.1.1
@@ -113,6 +113,7 @@ This script works for both 3.1.1: 1 and 2.
 %
 \newpage
 \subsection{Count Reviews: Sorted}
+\subsubsection{Source}
 \lstinputlisting{Q3/countreviews.sh}
 
 \subsubsection{Explanation}
@@ -132,9 +133,9 @@ hotelName=${hotelName%.dat}
 Removes the ``.dat"" suffix from ``hotelName" and assigns it to ``hotelName".
 
 \begin{lstlisting}
-currentCount="$(reviewcount $file) $hotelName"
+currentCount="$(getReviewCount $file) $hotelName"
 \end{lstlisting}
-Sets ``currentCount" to the output of ``reviewCount" with the hotel name appended to it. This makes it easier to use sort.
+Sets ``currentCount" to the output of ``getReviewCount" with the hotel name appended to it. This makes it easier to use sort.
 
 \begin{lstlisting}
 reviewCount="$reviewCount"$'\n'"$currentCount"
@@ -154,8 +155,92 @@ Using awk to print out the list as required was child's play.
 %	Hypothesis Testing Script
 %
 \newpage
-\subsubsection{Average Reviews}
+\subsection{Average Reviews}
+\subsubsection{Source}
 \lstinputlisting{averagereviews.sh}
+
+\newpage
+\subsubsection{Explanation}
+\begin{lstlisting}
+# Gets average score to 1dp
+function averageScore() {
+	t=$1
+	n=$2
+	
+	mean=$((t/n))
+	dp=$(( 10 * (t % n) / n ))
+	
+	echo "$mean.$dp"
+}
+\end{lstlisting}
+This function prints the result of $\$1 / \$2 $ to stdOut.
+As most UNIX shells only deal with integer arithmetic, a method that would produce a mean to 1 decimal place was required.
+It uses the modulo operator ``\%" to calulate the remainder, then, by multiplying the remainder by 10 and dividing by the number of reviews, it produces an integer of the first decimal place.
+This can then be concatenated onto the end of the original, integer, mean.
+
+\begin{lstlisting}
+# Gets the sum of all review scores
+function getTotalScore() {
+	Scores=$(grep "<Overall>" $1)
+	TotalScore=0
+	while read -r line; do
+		TotalScore=$((TotalScore + ${line:(-1)}))
+	done <<< "$Scores"
+	echo $TotalScore
+}
+\end{lstlisting}
+This function calculates the total of all the review scores ($\sum x$).
+It uses grep to filter the lines that contain the overall score (\textless Overall\textgreater).
+Then, it iterates over each individual score line.
+As the scores are out of a maximum of 5, the last character of the line is the score.
+Using bash string formatting, the last character is cut out, and added to the ``TotalScore".
+The total score is then output to stdOut.
+
+\begin{lstlisting}
+# Gets the average review of the hotel
+function getAverageScore() {
+	HotelFile=$1
+	
+	ReviewCount=$(getReviewCount $HotelFile)
+	TotalScore=$(getTotalScore $HotelFile)
+	echo $(averageScore $TotalScore $ReviewCount)
+}
+\end{lstlisting}
+This function uses the results of two of previous functions (getReviewCount and getTotalScore) and passes them to ``averageScore".
+The result of ``averageScore" is then printed to stdOut.
+
+\begin{lstlisting}
+# Gets the hotel ID from hotel file
+function getTrimmedHotelFile() {
+	filePath=$1
+	fileName=$2
+	hotelName=${fileName#$filePath/}
+	hotelName=${hotelName%.dat}
+	echo $hotelName
+}
+\end{lstlisting}
+This function gets the hotel ID in the form of hotel\_xxxxxx.
+It uses string manipulation to remove the directory path from the prefix of the filename
+Then it removes the .dat file extension.
+Again, the output of this function is printed to stdOut.
+
+\begin{lstlisting}
+# Checks argument passed was a directory
+if [ -d $1 ]
+then
+	# Loops through all files and prints HOTEL_ID AVERAGE_REVIEW
+	for file in $1/*
+	do
+		echo $(getTrimmedHotelFile $1 $file) $(getAverageScore $file)
+	done
+else
+	echo "$1 is not a valid directory."
+fi
+\end{lstlisting}
+This part of the script checks a directory was passed as the first argument.
+If a directory wasn't passed as the first argument, the script notifies the user, then terminates.
+Otherwise, it loops over every file in the data directory, then prints the hotel ID with the average review score.
+
 
 \newpage
 \section{Hypothesis Testing}
