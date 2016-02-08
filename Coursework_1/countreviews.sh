@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function reviewcount () {
+function getReviewCount () {
 	grep -c "<Author>" $1
 }
 
@@ -18,7 +18,7 @@ then
 		hotelName=${hotelName%.dat}
 		
 		# Set current count to reviewCount:file
-		currentCount="$(reviewcount $file) $hotelName"
+		currentCount="$(getReviewCount $file) $hotelName"
 
 		# Append currentCount to reviewCount using a newlinw (\n)
 		reviewCount="$reviewCount"$'\n'"$currentCount"

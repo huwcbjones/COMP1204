@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function reviewcount () {
+function getReviewCount () {
 	grep -c "<Author>" $1
 }
 
@@ -18,7 +18,7 @@ then
 		hotelName=${hotelName%.dat}
 		
 		# Set current count to reviewCount:file
-		currentCount="$(reviewcount $file) $hotelName"
+		currentCount="$(getReviewCount $file) $hotelName"
 
 		# Append currentCount to reviewCount using a newlinw (\n)
 		reviewCount="$reviewCount"$'\n'"$currentCount"
@@ -27,5 +27,5 @@ then
 	# Pipe $reviewCount into a reverse number sort, then format the result using awk
 	echo -e "$reviewCount" | sort -nr | awk '{print $2 " " $1}'
 else
-	reviewcount $1
+	getReviewCount $1
 fi

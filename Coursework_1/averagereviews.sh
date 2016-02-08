@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Gets number of reviews
-function reviewcount () {
+function getReviewCount () {
 	grep -c "<Author>" $1
 }
 
@@ -30,7 +30,7 @@ function getTotalScore() {
 function getAverageScore() {
 	HotelFile=$1
 	
-	ReviewCount=$(reviewcount $HotelFile)
+	ReviewCount=$(getReviewCount $HotelFile)
 	TotalScore=$(getTotalScore $HotelFile)
 	echo $(averageScore $TotalScore $ReviewCount)
 }

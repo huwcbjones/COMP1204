@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function reviewcount () {
+function getReviewCount () {
 	grep -c "<Author>" $1
 }
 
@@ -11,9 +11,9 @@ then
 	# Loop through files and do reviewcount
 	for file in $1/*
 	do
-		reviewcount $file
+		getReviewCount $file
 	done;
 	
 else
-	reviewcount $1
+	getReviewCount $1
 fi
