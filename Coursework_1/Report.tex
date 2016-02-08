@@ -1,0 +1,66 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[bookmarks]{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{col_green}{rgb}{0,0.6,0}
+\definecolor{col_grey}{rgb}{0.5,0.5,0.5}
+\definecolor{col_mauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+  backgroundcolor=\color{white},
+  basicstyle=\footnotesize,
+  breaklines=true,
+  captionpos=b,
+  commentstyle=\color{col_green},
+  escapeinside={\%*}{*)},
+  keywordstyle=\color{blue},
+  stringstyle=\color{col_mauve},
+  tabsize=2,
+}
+\lstset{language=bash}
+
+\hypersetup{
+  pdfinfo={
+    Title={COMP1204: Unix Coursework},
+    Author={Huw Jones},
+  },
+  colorlinks=false,
+  pdfborder=0 0 0,
+}
+
+\pagestyle{headings}
+
+\author{Huw Jones \\27618153}
+\title{COMP1204: Unix Coursework}
+
+\begin{document}
+\maketitle
+\newpage
+
+\section{Scripts}
+\subsection{Count Reviews: Single File}
+\subsubsection{Source}
+\lstinputlisting{Q1/countreviews.sh}
+\subsubsection{Explanation}
+\begin{lstlisting}
+grep -c "<Author>" $1
+\end{lstlisting}
+As every review has an author, it made sense to search for the ``\textless Author\textgreater" string.
+Using the ``-c" argument for grep returns a search count, rather than the string of occurrences.
+``\$1" is used to get the first (real) argument when the script is executed on the command line.
+
+\subsection{Count Reviews: Directory}
+\lstinputlisting{Q2/countreviews.sh}
+
+\subsection{Count Reviews: Sorted}
+\lstinputlisting{Q3/countreviews.sh}
+
+\section{Hypothesis Testing}
+
+\section{Discussion}
+
+\end{document}
