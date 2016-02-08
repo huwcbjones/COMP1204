@@ -1,17 +1,19 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[a4paper]{article}
 
 \usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
 \usepackage[bookmarks]{hyperref}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{color}
 
+\definecolor{col_light_grey}{rgb}{0.9, 0.9, 0.9}
 \definecolor{col_green}{rgb}{0,0.6,0}
 \definecolor{col_grey}{rgb}{0.5,0.5,0.5}
 \definecolor{col_mauve}{rgb}{0.58,0,0.82}
 
 \lstset{
-  backgroundcolor=\color{white},
+  backgroundcolor=\color{col_light_grey},
   basicstyle=\footnotesize,
   breaklines=true,
   captionpos=b,
@@ -43,6 +45,9 @@
 
 \section{Scripts}
 
+%	3.1.1
+%	Question 1
+%
 \subsection{Count Reviews: Single File}
 
 \subsubsection{Source}
@@ -58,7 +63,9 @@ As every review has an author, it made sense to search for the ``\textless Autho
 Using the ``-c" argument for grep returns a search count, rather than the string of occurrences.
 ``\$1" is used to get the first (real) argument when the script is executed on the command line.
 
-
+%	3.1.1
+%	Question 2
+%
 \subsection{Count Reviews: Directory}
 
 \subsubsection{Source}
@@ -101,11 +108,53 @@ This code is executed if the argument passed to the script is not a directory.
 It executes the ``reviewcount" as it should normally do for a file. \newline \newline
 This script works for both 3.1.1: 1 and 2.
 
+%	3.1.1
+%	Question 3
+%
+\newpage
 \subsection{Count Reviews: Sorted}
 \lstinputlisting{Q3/countreviews.sh}
 
+\subsubsection{Explanation}
+\begin{lstlisting}
+reviewCount=""
+\end{lstlisting}
+Initialises variable ``reviewCount" to an empty string.
+
+\begin{lstlisting}
+hotelName=${file#$1/}
+\end{lstlisting}
+This removes the directory prefix from ``\$1" (from when the script was called) from ``\$file" and assigns it to ``hotelName".
+
+\begin{lstlisting}
+hotelName=${hotelName%.dat}
+\end{lstlisting}
+Removes the ``.dat"" suffix from ``hotelName" and assigns it to ``hotelName".
+
+\begin{lstlisting}
+currentCount="$(reviewcount $file) $hotelName"
+\end{lstlisting}
+Sets ``currentCount" to the output of ``reviewCount" with the hotel name appended to it. This makes it easier to use sort.
+
+\begin{lstlisting}
+reviewCount="$reviewCount"$'\n'"$currentCount"
+\end{lstlisting}
+Appends ``currentCount" to the ``reviewCount" using a newline so we can maintain 1 hotel per line.
+
+\begin{lstlisting}
+echo -e "$reviewCount" | sort -nr | awk '{print $2 " " $1}'
+\end{lstlisting}
+Echoes the contents of ``reviewCount" to sdtOut whilst maintaining escape characters.
+The contents of ``reviewCount" is then piped into the stdIn of sort, which reverse sorts the hotel list by number of reviews.
+Finally, awk prints out the sorted list in the format [hotel] [review count].
+The list was originally stored as [review count] [hotel] as this makes it easier to use sort as we don't have to specify a sort column.
+Using awk to print out the list as required was child's play.
+
+\newpage
 \section{Hypothesis Testing}
 
+\newpage
 \section{Discussion}
+
 
 \end{document}
