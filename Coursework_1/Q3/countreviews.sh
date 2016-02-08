@@ -13,12 +13,12 @@ then
 	# Loop through files and do reviewcount
 	for file in $1/*
 	do
-		# Trim directory prefix and .dat suffix from filename to get hotel_xxxx
-		fileName=${file#$1/}
-		fileName=${fileName%.dat}
+		# Trim directory prefix and .dat suffix from hotelName to get hotel_xxxx
+		hotelName=${file#$1/}
+		hotelName=${hotelName%.dat}
 		
 		# Set current count to reviewCount:file
-		currentCount="$(reviewcount $file) $fileName"
+		currentCount="$(reviewcount $file) $hotelName"
 
 		# Append currentCount to reviewCount using a newlinw (\n)
 		reviewCount="$reviewCount"$'\n'"$currentCount"
