@@ -21,14 +21,14 @@ then
 		# Trim directory prefix and .dat suffix from hotelName to get hotel_xxxx
 		hotelName=$(getTrimmedHotelFile $file)
 		
-		# Set current count to reviewCount:file
-		currentCount="$(getReviewCount $file) $hotelName"
+		# Set current count to hotel_id count
+		currentCount="$hotelName"$'\t'"$(getReviewCount $file)"
 
 		# Append currentCount to reviewCount using a newline (\n)
 		reviewCount="$reviewCount"$'\n'"$currentCount"
 	done;
 	
-	# Pipe $reviewCount into a reverse number sort, then format the result using awk
+	# Pipe $reviewCount into a reverse number sort
 	echo -e "$reviewCount" | sort -k2nr
 else
 	hotelName=$(getTrimmedHotelFile $1)
