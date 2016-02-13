@@ -123,19 +123,40 @@ reviewCount=""
 Initialises variable ``reviewCount" to an empty string.
 
 \begin{lstlisting}
-hotelName=${file#$1/}
+function getTrimmedHotelFile() {
+	echo $1 | sed -e 's:^[/a-zA-Z_0-9\-]*\/::' -e 's:.dat::'
+}
 \end{lstlisting}
-This removes the directory prefix from ``\$1" (from when the script was called) from ``\$file" and assigns it to ``hotelName".
+This functions uses sed substitution to remove all directory prefixes up to the last forward slash in the file path (/) from ``\$file".
+It then uses another substitution to remove the .dat extension.
+Then, it assigns the result to ``hotelName".
+
+The regex works as follows.
+\begin{lstlisting}
+^
+\end{lstlisting}
+Matches from the start of the string
+\begin{lstlisting}
+^[/a-zA-Z_0-9\-]*
+\end{lstlisting}
+Matches 0 or more all alphanumeric characters, dashes, forward slashes and underscores from the start of the string.
+\begin{lstlisting}
+\/
+\end{lstlisting}
+Matches a forward slash. The backslash is used to escape it as forward slash is a special character.
 
 \begin{lstlisting}
-hotelName=${hotelName%.dat}
+^[/a-zA-Z_0-9\-]*\/
 \end{lstlisting}
-Removes the ``.dat"" suffix from ``hotelName" and assigns it to ``hotelName".
+So, overall this regex matches all directories up to the last slash before the file name.
+This allows the script to remove the directory prefix.
+If sed supported ``\textbackslash s\textbackslash S", I would have used that instead of the alphanumeric mess that is currently used.
 
 \begin{lstlisting}
-currentCount="$(getReviewCount $file) $hotelName"
+currentCount="$hotelName"$'\t'"$(getReviewCount $file)"
 \end{lstlisting}
-Sets ``currentCount" to the output of ``getReviewCount" with the hotel name appended to it. This makes it easier to use sort.
+Sets ``currentCount" to the hotel ID and the output of ``getReviewCount".
+The tab is used to make the output prettier than just using spaces.
 
 \begin{lstlisting}
 reviewCount="$reviewCount"$'\n'"$currentCount"
@@ -143,13 +164,12 @@ reviewCount="$reviewCount"$'\n'"$currentCount"
 Appends ``currentCount" to the ``reviewCount" using a newline so we can maintain 1 hotel per line.
 
 \begin{lstlisting}
-echo -e "$reviewCount" | sort -nr | awk '{print $2 " " $1}'
+echo -e "$reviewCount" | sort -k2nr
 \end{lstlisting}
 Echoes the contents of ``reviewCount" to sdtOut whilst maintaining escape characters.
 The contents of ``reviewCount" is then piped into the stdIn of sort, which reverse sorts the hotel list by number of reviews.
-Finally, awk prints out the sorted list in the format [hotel] [review count].
-The list was originally stored as [review count] [hotel] as this makes it easier to use sort as we don't have to specify a sort column.
-Using awk to print out the list as required was child's play.
+Sort takes a ``-k" argument that is used to specify the sort column.
+Here, ``-k2nr" sorts the string by the second column (number of reviews)(``k2"), as a numeric type (``n"), reversely (``r") (to sort by the greater number first).
 
 %	3.1.2
 %	Hypothesis Testing Script
@@ -181,19 +201,18 @@ This can then be concatenated onto the end of the original, integer, mean.
 \begin{lstlisting}
 # Gets the sum of all review scores
 function getTotalScore() {
-	Scores=$(grep "<Overall>" $1)
+	Scores=$(grep "<Overall>" $1 | sed -e 's:<Overall>::' -e 's:\r::')
 	TotalScore=0
 	while read -r line; do
-		TotalScore=$((TotalScore + ${line:(-1)}))
+		TotalScore=$((TotalScore + line))
 	done <<< "$Scores"
 	echo $TotalScore
 }
 \end{lstlisting}
 This function calculates the total of all the review scores ($\sum x$).
 It uses grep to filter the lines that contain the overall score (\textless Overall\textgreater).
-Then, it iterates over each individual score line.
-As the scores are out of a maximum of 5, the last character of the line is the score.
-Using bash string formatting, the last character is cut out, and added to the ``TotalScore".
+Then, pipes the grep output to a sed substitution that removes ``\textless Overall\textgreater".
+Next, it adds the line (which should be the rating) to the ``TotalScore".
 The total score is then output to stdOut.
 
 \begin{lstlisting}
@@ -210,36 +229,24 @@ This function uses the results of two of previous functions (getReviewCount and 
 The result of ``averageScore" is then printed to stdOut.
 
 \begin{lstlisting}
-# Gets the hotel ID from hotel file
-function getTrimmedHotelFile() {
-	filePath=$1
-	fileName=$2
-	hotelName=${fileName#$filePath/}
-	hotelName=${hotelName%.dat}
-	echo $hotelName
-}
-\end{lstlisting}
-This function gets the hotel ID in the form of hotel\_xxxxxx.
-It uses string manipulation to remove the directory path from the prefix of the filename
-Then it removes the .dat file extension.
-Again, the output of this function is printed to stdOut.
-
-\begin{lstlisting}
 # Checks argument passed was a directory
 if [ -d $1 ]
 then
 	# Loops through all files and prints HOTEL_ID AVERAGE_REVIEW
 	for file in $1/*
 	do
-		echo $(getTrimmedHotelFile $1 $file) $(getAverageScore $file)
+		currentHotel="$(getTrimmedHotelFile $file)"$'\t'"$(getAverageScore $file)"
+		hotels="$hotels"$'\n'"$currentHotel"
 	done
+	
+	# Sort hotels by second column (rating)
+	echo -e "$hotels" | sort -k2nr
 else
-	echo "$1 is not a valid directory."
+	echo "$(getTrimmedHotelFile $1) $(getAverageScore $1)"
 fi
 \end{lstlisting}
 This part of the script checks a directory was passed as the first argument.
-If a directory wasn't passed as the first argument, the script notifies the user, then terminates.
-Otherwise, it loops over every file in the data directory, then prints the hotel ID with the average review score.
+Otherwise, it loops over every file in the data directory, then prints the hotel ID with the average review score, sorted by average review.
 
 
 \newpage
