@@ -4,6 +4,11 @@ function getReviewCount () {
 	grep -c "<Author>" $1
 }
 
+# Gets the hotel ID from hotel file
+function getTrimmedHotelFile() {
+	echo $1 | sed -e 's:^[/a-zA-Z_0-9\-]*\/::' -e 's:.dat::'
+}
+
 # If provided argument is a directory
 if [ -d $1 ]
 then
@@ -14,18 +19,18 @@ then
 	for file in $1/*
 	do
 		# Trim directory prefix and .dat suffix from hotelName to get hotel_xxxx
-		hotelName=${file#$1/}
-		hotelName=${hotelName%.dat}
+		hotelName=$(getTrimmedHotelFile $file)
 		
 		# Set current count to reviewCount:file
 		currentCount="$(getReviewCount $file) $hotelName"
 
-		# Append currentCount to reviewCount using a newlinw (\n)
+		# Append currentCount to reviewCount using a newline (\n)
 		reviewCount="$reviewCount"$'\n'"$currentCount"
 	done;
 	
 	# Pipe $reviewCount into a reverse number sort, then format the result using awk
-	echo -e "$reviewCount" | sort -nr | awk '{print $2 " " $1}'
+	echo -e "$reviewCount" | sort -k2nr
 else
-	reviewcount $1
-fi
+	hotelName=$(getTrimmedHotelFile $1)
+	echo $hotelName $(getReviewCount $1)
+fi	
