@@ -20,7 +20,7 @@ function getAverageScore() {
 	}
 
 	END {
-		print (TotalScore / n);
+		printf ("%.9f\n", TotalScore / n);
 	}
 	'
 }
@@ -41,7 +41,7 @@ function getSD() {
 
 		END {
 			var = Total/(n-1);
-			print sqrt(var);
+			printf("%.9f\n", sqrt(var));
 		}
 	'
 }
@@ -57,13 +57,13 @@ function getSx1x2() {
 	nX1=$2
 	S2X2=$3
 	nX2=$4
-	
+
 	awk '
 	BEGIN {
-		numer=( ('$nX1' - 1) * '$S2X1') + ( ('$nX2' - 1) * '$S2X2');
+		numer=( ('$nX1' - 1) * ('$S2X1')^2) + ( ('$nX2' - 1) * ('$S2X2')^2);
 		denom=( '$nX1' + '$nX2' - 2 );
 		frac = numer / denom;
-		print sqrt(frac);
+		printf ("%.9f\n", sqrt(frac) );
 	}
 	'
 }
@@ -78,8 +78,8 @@ function getT_Statistic() {
 	awk '
 	BEGIN {
 		numer=( '$M1' - '$M2' );
-		denom=( '$Sx1x2' * sqrt( 1/'$n1' + 1/'$n2'));
-		print (numer/denom);
+		denom=( '$Sx1x2' * sqrt((1/'$n1') + (1/'$n2')) );
+		printf ("%.9f\n", (numer/denom) );
 	}
 	'
 }
