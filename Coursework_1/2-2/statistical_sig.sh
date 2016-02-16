@@ -1,4 +1,7 @@
 #!/bin/bash
+
+CRITICAL_VALUE=1.965
+
 function getScores() {
 	grep "<Overall>" $1 | sed -e 's:<Overall>::'
 }
@@ -127,3 +130,5 @@ t_stat=$(getT_Statistic $hotel1_mean $hotel1_n $hotel2_mean $hotel2_n $Sx1x2)
 echo "t: $(round $t_stat 2)"
 echo "Mean $hotel1:"$'\t'"$(round $hotel1_mean 2),"$'\t'"SD: $(round $hotel1_sd 2)"
 echo "Mean $hotel2:"$'\t'"$(round $hotel2_mean 2),"$'\t'"SD: $(round $hotel2_sd 2)"
+
+awk ' BEGIN { if ( '$t_stat' < '$CRITICAL_VALUE' ) { print 0 } else { print 1 } }'
