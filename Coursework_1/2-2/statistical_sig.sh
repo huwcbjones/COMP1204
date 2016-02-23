@@ -3,8 +3,12 @@ function getScores() {
 	grep "<Overall>" $1 | sed -e 's:<Overall>::'
 }
 
+function getN() {
+	echo -e "$(getScores $1)" | wc -l
+}
+
 function getAverageScore() {
-	echo $(getScores $1 | awk '
+	echo -e "$(getScores $1)" | awk '
 	BEGIN {
 		TotalScore=0;
 		n=0;
@@ -12,17 +16,18 @@ function getAverageScore() {
 
 	{
 		TotalScore += $0;
-		n += 1;
+		n++;
 	}
 
 	END {
-		printf ("%.2f\n", (TotalScore / n));
+		print (TotalScore / n);
 	}
-	')
+	'
 }
+
 function getSD() {
-	file=$1
-	mean=$2
+	file="$1"
+	mean="$2"
 	echo -e "$(getScores $1)" | awk '
 		BEGIN {
 			Total=0;
@@ -30,13 +35,13 @@ function getSD() {
 		}
 
 		{
-			Total += (($0 - $'$mean')^2);
+			Total += (($0 - '$mean')^2);
 			n++;
 		}
 
 		END {
 			var = Total/(n-1);
-			printf ("%.2f\t%.2f\t%.2f\n", Total, var, sqrt(var));
+			print sqrt(var);
 		}
 	'
 }
@@ -46,19 +51,51 @@ function getTrimmedHotelFile() {
 	echo $1 | sed -e 's:^[/a-zA-Z_0-9\-]*\/::' -e 's:.dat::'
 }
 
+# Calculates the common standard deviation
+function getSx1x2() {
+	S2X1=$1
+	nX1=$2
+	S2X2=$3
+	nX2=$4
+	
+	awk '
+	BEGIN {
+		numer=( ('$nX1' - 1) * '$S2X1') + ( ('$nX2' - 1) * '$S2X2');
+		denom=( '$nX1' + '$nX2' - 2 );
+		frac = numer / denom;
+		print sqrt(frac);
+	}
+	'
+}
 
-# Check 2 arguments were passed
+# Calculates the t-statistic
+function getT_Statistic() {
+	M1=$1
+	n1=$2
+	M2=$3
+	n2=$4
+	Sx1x2=$5
+	awk '
+	BEGIN {
+		numer=( '$M1' - '$M2' );
+		denom=( '$Sx1x2' * sqrt( 1/'$n1' + 1/'$n2'));
+		print (numer/denom);
+	}
+	'
+}
+
+function round(){
+	awk 'BEGIN { printf ("%.'$2'f\n", '$1') }'
+}
 
 
-hotel1=$1
-hotel2=$2
+# Trim hotel files down to the name
+hotel1=$(getTrimmedHotelFile $1)
+hotel2=$(getTrimmedHotelFile $2)
 
 # Convert hotel IDs to file-names/paths
-hotel1_file=$(echo $hotel1.dat)
-hotel2_file=$(echo $hotel2.dat)
-hotel1_mean=$(getAverageScore $hotel1_file)
-echo "hotel1_mean=$hotel1_mean"
-echo hotel1_sd=$(getSD $hotel1_file $hotel1_mean)
+hotel1_file=$(echo $1.dat)
+hotel2_file=$(echo $2.dat)
 
 # Check the hotel files exist
 if [ ! -f $hotel1_file ]
@@ -72,13 +109,21 @@ then
 	exit
 fi
 
+# Get number of reviews
+hotel1_n=$(getN $hotel1_file)
+hotel2_n=$(getN $hotel2_file)
+
 # Get hotel means
 hotel1_mean=$(getAverageScore $hotel1_file)
 hotel2_mean=$(getAverageScore $hotel2_file)
 
 # Get t-statistic
 hotel1_sd=$(getSD $hotel1_file $hotel1_mean)
-hotel2_sd=""
+hotel2_sd=$(getSD $hotel2_file $hotel2_mean)
 
-echo "Mean $hotel1: $hotel_1_mean, SD: $hotel1_sd"
-echo "Mean $hotel2: $hotel_2_mean, SD: $hotel2_sd"
+Sx1x2=$(getSx1x2 $hotel1_sd $hotel1_n $hotel2_sd $hotel2_n)
+t_stat=$(getT_Statistic $hotel1_mean $hotel1_n $hotel2_mean $hotel2_n $Sx1x2)
+
+echo "t: $(round $t_stat 2)"
+echo "Mean $hotel1:"$'\t'"$(round $hotel1_mean 2),"$'\t'"SD: $(round $hotel1_sd 2)"
+echo "Mean $hotel2:"$'\t'"$(round $hotel2_mean 2),"$'\t'"SD: $(round $hotel2_sd 2)"
