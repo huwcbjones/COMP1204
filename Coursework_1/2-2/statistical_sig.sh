@@ -1,38 +1,22 @@
 #!/bin/bash
 
-# Gets number of reviews
-function getReviewCount () {
-	grep -c "<Author>" $1
-}
-
-# Gets average score to 1dp
-function averageScore() {
-	t=$1
-	n=$2
-	
-	mean=$((t/n))
-	dp=$(( 10 * (t % n) / n ))
-	
-	echo "$mean.$dp"
-}
-
-# Gets the sum of all review scores
-function getTotalScore() {
-	Scores=$(grep "<Overall>" $1 | sed -e 's:<Overall>::' -e 's:\r::')
-	TotalScore=$(awk -e 'BEGIN {$x=0} {x+= $0} END {print $x}')
-	#while read -r line; do
-	#	TotalScore=$((TotalScore + line))
-	#done <<< "$Scores"
-	echo $TotalScore
-}
-
-# Gets the average review of the hotel
 function getAverageScore() {
-	HotelFile=$1
+	Scores=$(grep "<Overall>" $1 | sed -e 's:<Overall>::')
+	echo $(echo -e "$Scores" | awk '
+	BEGIN {
+		TotalScore=0;
+		n=0;
+	}
 
-	ReviewCount=$(getReviewCount $1)
-	TotalScore=$(getTotalScore $HotelFile)
-	echo $(averageScore $TotalScore $ReviewCount)
+	{
+		TotalScore += $0;
+		n += 1;
+	}
+
+	END {
+		printf ("%.1f\n", (TotalScore / n));
+	}
+	')
 }
 
 # Gets the hotel ID from hotel file
