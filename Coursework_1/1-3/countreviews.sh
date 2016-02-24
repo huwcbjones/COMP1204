@@ -6,7 +6,7 @@ function getReviewCount () {
 
 # Gets the hotel ID from hotel file
 function getTrimmedHotelFile() {
-	echo $1 | sed -e 's:^[/a-zA-Z_0-9\-]*\/::' -e 's:.dat::'
+	echo $1 | sed -e 's:^.*\/::' -e 's:.dat::'
 }
 
 # If provided argument is a directory
