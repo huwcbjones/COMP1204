@@ -372,12 +372,40 @@ RDBMS provides Structured Query Language (SQL) as a means of querying the databa
 SQL also contains functions, and can be used to create functions that perform the statistical anaylsis.
 
 
-\subsection{Collection}
+\subsection{Collection and Authenticity}
 Collecting reviews at first would seem a rather simple affair, however it requires more thought than just putting a review form on a webpage.
 Many factors need to be considered when moderating reviews.
+Currently, the form shows no sign of bot protection.
 
 \subsubsection{Authenticity}
-How can one validate the authenticity of a review?
+Connecting with third party holiday/booking sites could be used the validate the authenticity of a review.
+As the user has booked a holiday through the third party, the system can verify that a user has visited the hotel, and therefore can make sure that users have actually visited the hotel they are reviewing.
+This could be connected to the hotel rating system where verified reviews (where the user can prove they have been there) would hold more weight than reviews that are unverified.
 
+Adding a visit date field to the review form could also help users get a better representation of a hotel.
+For example, a bad hotel may be bought and run under new management.
+In this example, you would expect reviews to increase, by logging the date of a stay, the hotel review could be adjusted to take into account the date when this change in reviews occured.
+This would mean older, lower, or higher rated reviews would have less of an affect compared to newer reviews that fitted this new pattern.
+
+\subsubsection{Bot and Spam Prevention}
+So how can one validate the authenticity of a review?
+Checking for bots could be offloaded to the reCAPTCHA service.
+This would instantly filter out bots using Google's reCAPTCHA service.
+reCAPTCHA uses machine learning to identify organic (human) responses to small puzzles or visual identification challenges, and filter out bots.
+
+Restricting the rate at which users can post reviews could aid trustworthyness.
+This restriction would hinder users that are paid to create false reviews as it would restrict the rate at which they could post reviews.
+
+\subsubsection{Moderation}
+Machine learning algorithms could also be used to moderate a users content.
+With a record of a user's past reviews, and current hotel reviews, a statistical model could be produced that can indicate whether a review (based on the individual rating components) is withing the tolerances for that hotel.
+If the review is flagged by the system because it does not fit the existing pattern, it could be raised to the attention of moderators.
+
+Moderators are staff members whose job is to moderate reviews.
+Reviews could be flagged for moderation through a report/flag review button, by the review rating not fitting the statistical pattern (see above), or as a way to validate new users.
+
+To prevent lots of new accounts being created to get around the anti-bot system, flagging the first `x' reviews of a new user to be moderated could help to reduce the amount of spam and low quality reviews.
+This system would hold the review to be pended for moderation.
+A moderator would then review the review and either accept it, reject it, or if it's a low quality review, provide some feedback on how to increase the quality of the review.
 
 \end{document}
