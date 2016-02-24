@@ -107,7 +107,7 @@ Initialises variable ``reviewCount" to an empty string.
 
 \begin{lstlisting}
 function getTrimmedHotelFile() {
-	echo $1 | sed -e 's:^[/a-zA-Z_0-9\-]*\/::' -e 's:.dat::'
+	echo $1 | sed -e 's:^.*\/::' -e 's:.dat::'
 }
 \end{lstlisting}
 This functions uses sed substitution to remove all directory prefixes up to the last forward slash in the file path (/) from ``\$file".
@@ -120,9 +120,9 @@ The regex works as follows.
 \end{lstlisting}
 Matches from the start of the string
 \begin{lstlisting}
-^[/a-zA-Z_0-9\-]*
+^.*
 \end{lstlisting}
-Matches 0 or more all alphanumeric characters, dashes, forward slashes and underscores from the start of the string.
+Matches 0 or more all characters from the start of the string.
 \begin{lstlisting}
 \/
 \end{lstlisting}
@@ -133,7 +133,6 @@ Matches a forward slash. The backslash is used to escape it as forward slash is 
 \end{lstlisting}
 So, overall this regex matches all directories up to the last slash before the file name.
 This allows the script to remove the directory prefix.
-If sed supported ``\textbackslash s\textbackslash S", I would have used that instead of the alphanumeric mess that is currently used.
 
 \begin{lstlisting}
 currentCount="$hotelName"$'\t'"$(getReviewCount $file)"
@@ -283,7 +282,7 @@ function getT_Statistic() {
 	'
 }
 \end{lstlisting}
-Using the formula $t = \frac{\bar{X_1} - \bar{X_2}}{s X_1 X_2 \cdot \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}$, this function cal the t-statistic.
+Using the formula $t = \frac{\bar{X_1} - \bar{X_2}}{s X_1 X_2 \cdot \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}$, this function calculates the t-statistic.
 It takes 4 arguments, ``M1"/``M2" ($\bar{X_1}$, $\bar{X_2}$) and ``n1"/``n2" ($n_1$, $n_2$).
 
 \begin{lstlisting}
@@ -292,11 +291,34 @@ function round(){
 }
 \end{lstlisting}
 Rounds a float to a given number of decimal places.
-It takes 2 arguments, ``\$1", the number to round, and ``\$2"", the number of places.
+It takes 2 arguments, ``\$1", the number to round, and ``\$2", the number of places.
 
 \newpage
 \section{Hypothesis Testing}
+\subsection{Hypotheses}
+\begin{equation}
+H_{0} : \textrm{The hotels are not statistically significant}
+\end{equation}
+\begin{equation}
+H_{A} : \textrm{The hotels are statistically significant}
+\end{equation}
 
+\subsection{Using}
+\begin{itemize}
+	\item Two tailed test, $\textrm{critical value} = 1.965$
+	\item 5\% significance
+\end{itemize}
+
+\subsection{Outcome}
+\begin{lstlisting}[language={}]
+$ ./statistical_sig.sh hotel_188937 hotel_203921
+t: 0.03
+Mean hotel_188937:      4.78,   SD: 0.63
+Mean hotel_203921:      4.78,   SD: 0.53
+0
+\end{lstlisting}
+Therefore null hypothesis validated.
+Two hotels are not statistically significant.
 
 \newpage
 \section{Discussion}
@@ -356,7 +378,7 @@ Linking reviews to specific users could also introduce the possibility of a repu
 \subsubsection{Reputation}
 A reputation based system could offer the ability for reviewers with more, higher quality reviews to affect the bias of a hotel's ranking (similar to StackOverflow, but better).
 User reputation could also be used to filter trustworthy, or untrustworthy reviews.
-This means bots, or spamming users, would be able to get filtered out from the pool of trustworthy reviews.
+This means bots, or spamming users, would be able to be filtered out from the pool of trustworthy reviews.
 On the other hand, this would impeded new users' ability to raise their reputation due to the competition with existing reviewers (a problem StackOverflow encounters).
 
 The sytem should also take into account the number of reviews, average rating, and user reputation in order to produce a metric that can rank hotels accurately and as unbiased as possible (within reason).
