@@ -101,7 +101,6 @@ This script works for both 3.1.1: 1 and 2.
 %	3.1.1
 %	Question 3
 %
-\newpage
 \subsection{Count Reviews: Sorted}
 \begin{lstlisting}
 reviewCount=""
@@ -213,7 +212,14 @@ Otherwise, it loops over every file in the data directory, then prints the hotel
 %	Hypothesis Testing Script 2
 %
 \newpage
-\subsection{Average Reviews}
+\subsection{Statistical Significance}
+
+\begin{lstlisting}
+function getN() {
+	echo -e "$(getScores $1)" | wc -l
+}
+\end{lstlisting}
+Returns the number of reviews a hotel has.
 
 \begin{lstlisting}
 function getSD() {
@@ -232,7 +238,7 @@ function getSD() {
 
 		END {
 			var = Total/(n-1);
-			print sqrt(var);
+			printf("%.9f\n", sqrt(var));
 		}
 	'
 }
@@ -248,14 +254,16 @@ function getSx1x2() {
 	nX1=$2
 	S2X2=$3
 	nX2=$4
-	
+
 	awk '
 	BEGIN {
-		numer=( ('$nX1' - 1) * '$S2X1') + ( ('$nX2' - 1) * '$S2X2');
+		numer=( ('$nX1' - 1) * ('$S2X1')^2) + ( ('$nX2' - 1) * ('$S2X2')^2);
 		denom=( '$nX1' + '$nX2' - 2 );
 		frac = numer / denom;
-		print sqrt(frac);
+		printf ("%.9f\n", sqrt(frac) );
 	}
+	'
+}
 \end{lstlisting}
 This function calulates $s X_1 X_2$ and takes 4 arguments: $S^2X_1$, $n_1$, $S^2X_2$, and  $n_2$.
 It uses awk to calulate $s X_1 X_2 = \sqrt{\frac{(n_1 - 1)s^{2}_{X1} + (n_2 - 1)s^{2}_{X2}}{n_1 + n_2 - 2}}$.
@@ -271,8 +279,8 @@ function getT_Statistic() {
 	awk '
 	BEGIN {
 		numer=( '$M1' - '$M2' );
-		denom=( '$Sx1x2' * sqrt( 1/'$n1' + 1/'$n2'));
-		print (numer/denom);
+		denom=( '$Sx1x2' * sqrt((1/'$n1') + (1/'$n2')) );
+		printf ("%.9f\n", (numer/denom) );
 	}
 	'
 }
@@ -280,11 +288,91 @@ function getT_Statistic() {
 Using the formula $t = \frac{\bar{X_1} - \bar{X_2}}{s X_1 X_2 \cdot \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}$, this function cal the t-statistic.
 It takes 4 arguments, ``M1"/``M2" ($\bar{X_1}$, $\bar{X_2}$) and ``n1"/``n2" ($n_1$, $n_2$).
 
+\begin{lstlisting}
+function round(){
+	awk 'BEGIN { printf ("%.'$2'f\n", '$1') }'
+}
+\end{lstlisting}
+Rounds a float to a given number of decimal places.
+It takes 2 arguments, ``\$1", the number to round, and ``\$2"", the number of places.
+
 \newpage
 \section{Hypothesis Testing}
 
+
 \newpage
 \section{Discussion}
+
+\subsection{Storage}
+TripAdvisor currently uses a tag based format to save their reviews.
+The format requires the use of one file per hotel.
+
+\subsubsection{Format}
+Comments are provided using double forward slash (C style).
+\begin{lstlisting}[language={}]
+// Hotel Identifier
+<Overall Rating>n
+<Avg. Price>$nnn
+<URL>xxx
+					// newline
+<Author>
+<Content>
+<Date>MMM d, YYYY
+<img>				//optional
+<No. Reader>n
+<No. Helpful>n
+<Overall>
+<Value>
+<Rooms>
+<Location>
+<Cleanliness>
+<Check in / front desk>
+<Service>
+<Business service>
+\end{lstlisting}
+This format is very open for interpretation.
+For example, there is no end deliminator for each field.
+Since there seems to be no concrete specification of how the data is to be interpreted, software could assume that the end of a line signifies the end of a field.
+However, there are fields that span multiple lines - namely the ``Content" field.
+
+Compared to the JSON or XML specifications, there is no logical structure to the data.
+Structuring your data properly reduces the time to process it, and makes it easier to comprehend; not only for humans, but for machines too.
+
+\subsubsection{Repetition}
+Secondly, storing the data in this format creates a lot of repetition.
+For each review, the tag names are specified.
+With hotels in the hundreds of thousands and each hotel having a multiple reviews, there is a lot of duplication.
+On a scale this large, that amount of data duplication should be avoided.
+
+A Relational Database Management System (RDBMS) would be beneficial in storing this data.
+Depending on the schema selected, this would impose some limits (e.g.: maximum content length), however they should not affect the storage of reviews compared to the current system.
+
+\subsubsection{Data Relationships}
+An RDBMS would allow the individual hotel details to be migrated away from being stored with reviews.
+Not only would this allow for the schema to integrate with the rest of the site, it would allow the reviews to be separated.
+
+A foreign key constraint (FKC) could be used to maintain a relationship with the review and the hotel.
+Additionally, the review could also be linked to a user table.
+Linking reviews to specific users could also introduce the possibility of a reputation-based system.
+
+\subsubsection{Reputation}
+A reputation based system could offer the ability for reviewers with more, higher quality reviews to affect the bias of a hotel's ranking (similar to StackOverflow, but better).
+User reputation could also be used to filter trustworthy, or untrustworthy reviews.
+This means bots, or spamming users, would be able to get filtered out from the pool of trustworthy reviews.
+On the other hand, this would impeded new users' ability to raise their reputation due to the competition with existing reviewers (a problem StackOverflow encounters).
+
+The sytem should also take into account the number of reviews, average rating, and user reputation in order to produce a metric that can rank hotels accurately and as unbiased as possible (within reason).
+Take Amazon for example, it could recommend a product with 2, 5 star reviews.
+However, is a product with 2, 5 star reviews better than a product with 2,000 reviews and an average rating of 4.5?
+Somehow the system would need to balance this to allow well reviewed hotels to not take precedance over slightly less known, but equally as well reviewed hotels.
+Due to the complex nature of this system, caching hotel rankings and periodically updating them, would offer better performance then calculating a hotel's rank everytime it's page is requested.
+
+\subsubsection{Speed}
+RDBMS's can also be orders of magnitude faster than the existing file based system.
+This means querying or performing statistical analysis on the data (as completed in this report) would be able to be completed with a greater speed and ease.
+RDBMS provides Structured Query Language (SQL) as a means of querying the database.
+SQL also contains functions, and can be used to create functions that perform the statistical anaylsis.
+
 
 
 \end{document}
