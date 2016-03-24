@@ -1,0 +1,16 @@
+<Author>
+<Avg. Price>
+<Business service>
+<Check in / front desk>
+<Cleanliness>
+<Content>
+<Date>
+<Location>
+<No. Helpful>
+<No. Reader>
+<Overall>
+<Overall Rating>
+<Rooms>
+<Service>
+<URL>
+<Value>
