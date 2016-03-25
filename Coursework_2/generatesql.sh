@@ -69,25 +69,26 @@ function processHotel() {
 				sub(/<Overall Rating>/, "", $i);
 				overall = $i;
 			} else if(match($i, "<Avg. Price>")){
-				sub(/<Avg. Price>/, "", $i);
+				sub(/<Avg. Price>\$/, "", $i);
 				avgPrice = $i;
 			} else if(match($i, "<URL>")){
 				sub(/<URL>/, "", $i);
-				data[recordNum]["author"] = $i;
+				URL = $i;
 			} else if(match($i, "<Avg. Price>")){
 				sub(/<Avg. Price>/, "", $i);
-				data[recordNum]["author"] = $i;
+				avgPrice = $i;
 			} else if(match($i, "<Author>")){
 				sub(/<Author>/, "", $i);
 				data[recordNum]["author"] = $i;
-			} else
+			}
 		}
 		recordNum++;
 	}
 	END {
-		print URL;
-		print overall;
-		print avgPrice;
+		print "Hotel ID: " hotelID;
+		print "URL     : " URL;
+		print "OverallS: " overall;
+		print "AvgPrice: " avgPrice;
 		for(record in data) {
 			for (field in data[record]){
 				print data[record][field];
