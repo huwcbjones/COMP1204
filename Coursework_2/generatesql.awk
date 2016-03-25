@@ -26,7 +26,10 @@ BEGIN {
 				sub(/<Avg\. Price>/, "", $i);
 				avgPrice = $i;
 			}
-			next;
+			if ($i == NF) {
+				recordNum++;
+				next;
+			}
 		}
 		# Get the record fields
 		if(match($i, "<Author>")){
