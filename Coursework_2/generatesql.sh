@@ -11,7 +11,7 @@ fi
 # * @param $1 Hotel File name
 # **
 function getHotelID() {
-	echo $1 | sed -e 's:^.*\/::' -e 's:.dat::'
+	echo $1 | sed -e 's:^.*\/hotel_::' -e 's:.dat::'
 }
 
 # **
@@ -46,16 +46,38 @@ function createTable() {
 # **
 function processHotel() {
 	hotelID=$(getHotelID $1)
-	overallRating=$(getField $1 "<Overall Rating>")
-	averagePrice=$(getField $1 "<Avg. Price>$")
-	URL=$(getField $1 "<URL>")
-	awk '
-	BEGIN {
-		HotelID='$hotelID';
-		AveragePrice='$averagePrice';
-		OverallRating='$overallRating';
-		URL="'$URL'";
-		print $hotelID, $OverallRating, $URL;
+	overallRating=$(getField $1 '<Overall Rating>')
+	averagePrice=$(getField $1 '<Avg. Price>\$')
+	URL=$(getField $1 '<URL>')
+	file=$(sed -e "s:\r\n:\n:" -e "s:\r:\n:" $1)
+	echo -e "$file"	| awk \
+		-v hotelID="$hotelID" \
+		-v averagePrice="$averagePrice" \
+		-v overallRating="$overallRating" \
+		-v URL="$URL" \
+	'BEGIN {
+		# Set record separator to ""
+		RS = "";
+		# Set field separator to "\n"
+		FS = "\n";
+		# Set record counter to 0
+		recordNum = 0;
+	}
+	{
+		for (i = 0; i < NF; i++){
+			if(match($i, "<Author>")){
+				sub(/<Author>/, "", $i);
+				data[recordNum]["author"] = $i;
+			}
+		}
+		recordNum++;
+	}
+	END {
+		for(record in data) {
+			for (field in data[record]){
+				print data[record][field];
+			}
+		}
 	}
 	'
 }
