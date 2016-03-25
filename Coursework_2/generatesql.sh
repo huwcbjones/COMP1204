@@ -6,7 +6,7 @@ then
 fi
 
 function getHotelID() {
-	echo $1 | sed -e 's:^.*\/::' -e 's:.dat::'
+	echo "$1" | sed -e 's:^.*\/::' -e 's:.dat::'
 }
 function createTable() {
 	echo "DROP TABLE HotelReviews;"
@@ -32,32 +32,35 @@ function createTable() {
 
 # Processes an individual hotel file
 function processHotel() {
+	echo "$1"
 	hotelID=$(getHotelID $1)
 	overallRating=$(getField $1 "<Overall Rating>")
 	URL=$(getField $1 "<URL>")
-	awk '
-	BEGIN {
-		HotelID='$hotelID';
-		OverallRating='$overallRating';
-		URL='$URL';
-	}
-	END {
-		print $hotelID, $OverallRating, $URL;
-	}
-	'
+	echo "$hotelID"
+#	awk '
+#	BEGIN {
+#		HotelID='$hotelID';
+#		OverallRating='$overallRating';
+#		URL="'$URL'";
+#	}
+#	END {
+#		print $hotelID, $OverallRating, $URL;
+#	}
+#	'
 }
 
 function getField() {
-	echo grep $1 $2 | sed -e 's:'$2'::'
+	echo "$2"
+	#grep " " "$2" | sed -e "s:$2::"
 }
 
+echo "$(createTable)" > hotelreviews.sql
 if [ -d $1 ]
 then
-	echo "$(createTable)" > hotelreviews.sql
 	for f in $1/*
 	do
 		echo "$(processHotel $f)" >> hotelreviews.sql
 	done
 else
-	echo "Argument provided was not a directory"
+	echo "$(processHotel $f)" 
 fi
