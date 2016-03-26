@@ -92,7 +92,7 @@ function processHotel() {
 	# * Escapes a field to prevent SQL errors
 	# **
 	function escapeField(field){
-		gsub(/\"/, "\"\"", field);
+		gsub(/"/, "\"\"", field);
 		return field;
 	}
 
