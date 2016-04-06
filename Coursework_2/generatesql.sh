@@ -5,9 +5,18 @@ then
 	exit 1;
 fi
 
+# **
+# * Extracts the HotelID from a hotel file name
+#
+# * @param $1 Hotel File name
+# **
 function getHotelID() {
-	echo "$1" | sed -e 's:^.*\/::' -e 's:.dat::'
+	echo $1 | sed -e 's:^.*\/::' -e 's:.dat::'
 }
+
+# **
+# * Returns the table schema
+# **
 function createTable() {
 	echo "DROP TABLE HotelReviews;"
 	echo "CREATE TABLE HotelReviews ("
@@ -30,28 +39,35 @@ function createTable() {
 	echo ");"
 }
 
-# Processes an individual hotel file
+# **
+# * Processes an individual hotel file
+# *
+# * @param $1 Filename of hotel file
+# **
 function processHotel() {
-	echo "$1"
 	hotelID=$(getHotelID $1)
 	overallRating=$(getField $1 "<Overall Rating>")
 	URL=$(getField $1 "<URL>")
-	echo "$hotelID"
-#	awk '
-#	BEGIN {
-#		HotelID='$hotelID';
-#		OverallRating='$overallRating';
-#		URL="'$URL'";
-#	}
-#	END {
-#		print $hotelID, $OverallRating, $URL;
-#	}
-#	'
+	awk '
+	BEGIN {
+		HotelID='$hotelID';
+		OverallRating='$overallRating';
+		URL="'$URL'";
+	}
+	END {
+		print $hotelID, $OverallRating, $URL;
+	}
+	'
 }
 
+# **
+# * Returns a field from a string
+# *
+# * @param $1 String
+# * @param $2 Field Name to filter
+# **
 function getField() {
-	echo "$2"
-	#grep " " "$2" | sed -e "s:$2::"
+	grep "$2" $1 | sed -e "s:$2::"
 }
 
 echo "$(createTable)" > hotelreviews.sql
@@ -62,5 +78,5 @@ then
 		echo "$(processHotel $f)" >> hotelreviews.sql
 	done
 else
-	echo "$(processHotel $f)" 
+	echo -e "$(processHotel $1)" 
 fi
