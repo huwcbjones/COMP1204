@@ -54,45 +54,71 @@
 \maketitle
 
 \section{ERD and Normalisation}
-\subsection{EX1}
+\subsection{EX1 - Relation}
 \begin{Verbatim}[commandchars=+\[\]]
-HotelReviews(
-  +underline[ReviewID:+textbf[Integer]],              Author:+textbf[String],
-  Date:+textbf[Date],                     HotelName:+textbf[String],
-  URL:+textbf[String],                    AveragePrice:+textbf[Integer],
-  Content:+textbf[String],                Overall:+textbf[Integer],
-  OverallRating:+textbf[Integer],         BusinessService:+textbf[Integer],
-  CheckIn:+textbf[Integer],               Cleanliness:+textbf[Integer],
-  Rooms:+textbf[Integer],                 Service:+textbf[Integer],
-  Value:+textbf[Integer],                 NoReaders:+textbf[Integer],
-  NoHelpful:+textbf[Integer]
+HotelReview(
+  +underline[Author:+textbf[String]],                 +underline[Date:+textbf[Date]],
+  +underline[HotelID:+textbf[Integer]],              URL:+textbf[String],
+  AveragePrice:+textbf[Integer],          Content:+textbf[String],
+  Overall:+textbf[Integer],               OverallRating:+textbf[Integer],
+  BusinessService:+textbf[Integer],       CheckIn:+textbf[Integer],
+  Cleanliness:+textbf[Integer],           Rooms:+textbf[Integer],
+  Service:+textbf[Integer],               Value:+textbf[Integer],
+  NoReaders:+textbf[Integer],             NoHelpful:+textbf[Integer]
 )
 \end{Verbatim}
 
-\subsection{EX2}
+\subsection{EX2 - Functional Dependencies}
 \begin{tabular}{l l l c l l l l}
 Author & Date & HotelName & $\to$ & Content & OverallRating & BusinessService & CheckIn \\
 &&&& Cleanliness & Rooms & Service & Value \\
 &&&& NoReaders & NoHelpful & & \\
-HotelName & & & $\to$ & URL & Overall & AveragePrice & \\
+HotelID & & & $\to$ & URL & Overall & AveragePrice & \\
 \end{tabular}
 
-\subsection{EX3}
-\subsection{EX4}
+\subsection{EX3 - Normalised Relations}
+\begin{Verbatim}[commandchars=+\[\]]
+Hotel(
+  +underline[HotelID:+textbf[Integer]],
+  HotelName:+textbf[String],
+  URL:+textbf[String],
+  Overall:+textbf[Integer],
+  AveragePrice:+textbf[Integer]
+)
+Review(
+  +underline[ReviewID:}textbf[Integer]],
+  Author:+textbf[String],
+  Date:+textbf[Date],
+  HotelID:+textbf[Integer],
+  Content:+textbf[String],
+  OverallRating:+textbf[Integer],
+  BusinessService:+textbf[Integer],
+  CheckIn:+textbf[Integer],
+  Cleanliness:+textbf[Integer],
+  Rooms:+textbf[Integer],
+  Service:+textbf[Integer],
+  Value:+textbf[Integer],
+  NoReaders:+textbf[Integer],
+  NoHelpful:+textbf[Integer]
+)
+\end{Verbatim}
+\subsection{EX4 - ERD Model}
 
 \section{Relation Algebra}
-\subsection{EX5}
-\subsection{EX6}
-\subsection{EX7}
-\subsection{EX8}
+\subsection{EX5 - Finding a user's reviews}
+\subsection{EX6 - Finding users with more than two reviews}
+\subsection{EX7 - Finding all hotels with more than 10 reviews}
+\subsection{EX8 - Finding all hotels with overall rating and cleanliness}
 
 \section{SQL}
-\subsection{EX9}
-\subsection{EX10}
-\subsection{EX11}
-\subsection{EX12}
-\subsection{EX13}
-\subsection{EX14}
+\subsection{EX9 - Creating HotelReviews Table}
+\subsection{EX10 - Creating a SQL insert script}
+\subsection{EX11 - Creating Normalised Tables}
+\subsection{EX12 - Populating Normalised Tables}
+\subsection{EX13 - Creating Indexes}
+
+\section{Data Retrieval and Analysis}
+\subsection{EX14 - Relational Algebra to SQL}
 
 \section{Conclusions}
 
