@@ -9,6 +9,8 @@
 \usepackage{courier}
 \usepackage{enumitem}
 \usepackage{pdfpages}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
 
 \definecolor{col_light_grey}{rgb}{0.9, 0.9, 0.9}
 \definecolor{col_green}{rgb}{0,0.6,0}
@@ -16,15 +18,18 @@
 \definecolor{col_mauve}{rgb}{0.58,0,0.82}
 
 \lstset{
+  escapeinside={\%*}{*}
+}
+\lstdefinestyle{default}{
   backgroundcolor=\color{col_light_grey},
   basicstyle=\footnotesize,
   breaklines=true,
   captionpos=b,
   commentstyle=\color{col_green},
-  escapeinside={\%*}{*)},
   keywordstyle=\color{blue},
   stringstyle=\color{col_mauve},
   tabsize=2,
+  mathescape
 }
 \lstset{language=bash}
 
@@ -47,12 +52,31 @@
 
 \begin{document}
 \maketitle
-\newpage
 
 \section{ERD and Normalisation}
 \subsection{EX1}
+\begin{Verbatim}[commandchars=+\[\]]
+HotelReviews(
+  +underline[ReviewID:+textbf[Integer]],              Author:+textbf[String],
+  Date:+textbf[Date],                     HotelName:+textbf[String],
+  URL:+textbf[String],                    AveragePrice:+textbf[Integer],
+  Content:+textbf[String],                Overall:+textbf[Integer],
+  OverallRating:+textbf[Integer],         BusinessService:+textbf[Integer],
+  CheckIn:+textbf[Integer],               Cleanliness:+textbf[Integer],
+  Rooms:+textbf[Integer],                 Service:+textbf[Integer],
+  Value:+textbf[Integer],                 NoReaders:+textbf[Integer],
+  NoHelpful:+textbf[Integer]
+)
+\end{Verbatim}
 
 \subsection{EX2}
+\begin{tabular}{l l l c l l l l}
+Author & Date & HotelName & $\to$ & Content & OverallRating & BusinessService & CheckIn \\
+&&&& Cleanliness & Rooms & Service & Value \\
+&&&& NoReaders & NoHelpful & & \\
+HotelName & & & $\to$ & URL & Overall & AveragePrice & \\
+\end{tabular}
+
 \subsection{EX3}
 \subsection{EX4}
 
