@@ -5,6 +5,9 @@ then
 	exit 1;
 fi
 
+function getHotelID() {
+	echo $1 | sed -e 's:^.*\/::' -e 's:.dat::'
+}
 function createTable() {
 	echo "DROP TABLE HotelReviews;"
 	echo "CREATE TABLE HotelReviews ("
@@ -29,7 +32,23 @@ function createTable() {
 
 # Processes an individual hotel file
 function processHotel() {
-	echo "$1"
+	hotelID=$(getHotelID $1)
+	overallRating=$(getField $1 "<Overall Rating>")
+	URL=$(getField $1 "<URL>")
+	awk '
+	BEGIN {
+		HotelID='$hotelID';
+		OverallRating='$overallRating';
+		URL='$URL';
+	}
+	END {
+		print $hotelID, $OverallRating, $URL;
+	}
+	'
+}
+
+function getField() {
+	echo grep $1 $2 | sed -e 's:'$2'::'
 }
 
 if [ -d $1 ]
