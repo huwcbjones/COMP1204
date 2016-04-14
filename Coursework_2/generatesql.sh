@@ -52,9 +52,6 @@ function processHotel() {
 	file=$(sed -e "s:\r\n:\n:" -e "s:\r:\n:" $1)
 	echo -e "$file"	| awk \
 		-v hotelID="$hotelID" \
-		-v averagePrice="$averagePrice" \
-		-v overallRating="$overallRating" \
-		-v URL="$URL" \
 	'BEGIN {
 		# Set record separator to ""
 		RS = "";
