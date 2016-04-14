@@ -47,14 +47,14 @@ function createTable() {
 function processHotel() {
 	hotelID=$(getHotelID $1)
 	overallRating=$(getField $1 "<Overall Rating>")
+	averagePrice=$(getField $1 "<Avg. Price>$")
 	URL=$(getField $1 "<URL>")
 	awk '
 	BEGIN {
 		HotelID='$hotelID';
+		AveragePrice='$averagePrice';
 		OverallRating='$overallRating';
 		URL="'$URL'";
-	}
-	END {
 		print $hotelID, $OverallRating, $URL;
 	}
 	'
