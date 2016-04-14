@@ -18,6 +18,7 @@ function getHotelID() {
 # * Returns the table schema
 # **
 function createTable() {
+	echo "PRAGMA encoding = \"UTF-8\";"
 	echo "DROP TABLE HotelReviews;"
 	echo "CREATE TABLE HotelReviews ("
 	echo "  reviewID INTEGER PRIMARY KEY,"
@@ -51,51 +52,7 @@ function processHotel() {
 	URL=$(getField $1 '<URL>')
 	file=$(sed -e "s:\r\n:\n:" -e "s:\r:\n:" $1)
 	echo -e "$file"	| awk \
-		-v hotelID="$hotelID" \
-	'BEGIN {
-		# Set record separator to ""
-		RS = "";
-		# Set field separator to "\n"
-		FS = "\n";
-		# Set record counter to 0
-		recordNum = 0;
-	}
-	{
-		# Loop through all fields in record.
-		# NF is number of fields
-		for (i = 0; i < NF; i++){
-			# Get hotel properties
-			if(match($i, "<Overall Rating>")){
-				sub(/<Overall Rating>/, "", $i);
-				overall = $i;
-			} else if(match($i, "<Avg. Price>")){
-				sub(/<Avg. Price>\$/, "", $i);
-				avgPrice = $i;
-			} else if(match($i, "<URL>")){
-				sub(/<URL>/, "", $i);
-				URL = $i;
-			} else if(match($i, "<Avg. Price>")){
-				sub(/<Avg. Price>/, "", $i);
-				avgPrice = $i;
-			} else if(match($i, "<Author>")){
-				sub(/<Author>/, "", $i);
-				data[recordNum]["author"] = $i;
-			}
-		}
-		recordNum++;
-	}
-	END {
-		print "Hotel ID: " hotelID;
-		print "URL     : " URL;
-		print "OverallS: " overall;
-		print "AvgPrice: " avgPrice;
-		for(record in data) {
-			for (field in data[record]){
-				print data[record][field];
-			}
-		}
-	}
-	'
+		-v hotelID="$hotelID" -E generatesql.awk
 }
 
 # **
