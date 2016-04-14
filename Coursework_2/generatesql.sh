@@ -64,15 +64,33 @@ function processHotel() {
 		recordNum = 0;
 	}
 	{
+		# Loop through all fields in record.
+		# NF is number of fields
 		for (i = 0; i < NF; i++){
-			if(match($i, "<Author>")){
+			# Get hotel properties
+			if(match($i, "<Overall Rating>")){
+				sub(/<Overall Rating>/, "", $i);
+				overall = $i;
+			} else if(match($i, "<Avg. Price>")){
+				sub(/<Avg. Price>/, "", $i);
+				avgPrice = $i;
+			} else if(match($i, "<URL>")){
+				sub(/<URL>/, "", $i);
+				data[recordNum]["author"] = $i;
+			} else if(match($i, "<Avg. Price>")){
+				sub(/<Avg. Price>/, "", $i);
+				data[recordNum]["author"] = $i;
+			} else if(match($i, "<Author>")){
 				sub(/<Author>/, "", $i);
 				data[recordNum]["author"] = $i;
-			}
+			} else
 		}
 		recordNum++;
 	}
 	END {
+		print URL;
+		print overall;
+		print avgPrice;
 		for(record in data) {
 			for (field in data[record]){
 				print data[record][field];
