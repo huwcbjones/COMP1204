@@ -53,6 +53,10 @@
 \begin{document}
 \maketitle
 \section{ERD and Normalisation}
+
+%
+% EX1
+%
 \subsection{EX1 - Relation}
 \begin{Verbatim}[commandchars=+\[\]]
 HotelReview(
@@ -68,6 +72,9 @@ HotelReview(
 )
 \end{Verbatim}
 
+%
+% EX3
+%
 \subsection{EX2 - Functional Dependencies}
 \begin{tabular}{l l l c l l l l}
 Author & Date & HotelName & $\to$ & Content & OverallRating & BusinessService & CheckIn \\
@@ -76,6 +83,9 @@ Author & Date & HotelName & $\to$ & Content & OverallRating & BusinessService & 
 HotelID & & & $\to$ & URL & Overall & AveragePrice & \\
 \end{tabular}
 
+%
+% EX3
+%
 \subsection{EX3 - Normalised Relations}
 \begin{Verbatim}[commandchars=+\[\]]
 Hotel(
@@ -93,6 +103,9 @@ Review(
 )
 \end{Verbatim}
 
+%
+% EX4
+%
 \subsection{EX4 - ERD Model}
 \begin{center}
 \def\svgwidth{0.4 \columnwidth}
@@ -100,16 +113,36 @@ Review(
 \end{center}
 
 \section{Relation Algebra}
+
+%
+% EX5
+%
 \subsection{EX5 - Finding a user's reviews}
 $\sigma_{\textrm{author}=X} \textrm{(Review)}$
+
+%
+% EX6
+%
 \subsection{EX6 - Finding users with more than two reviews}
 $\Pi_{\textrm{author}, \textrm{noReviews}}\sigma_{\textrm{noReviews} > 2} \gamma \textrm{author}; \textrm{COUNT}(*) \to \textrm{noReviews} \textrm{(Review)}$
+
+%
+% EX7
+%
 \subsection{EX7 - Finding all hotels with more than 10 reviews}
 $\Pi_{\textrm{hotelID}, \textrm{noReviews}}\sigma_{\textrm{noReviews} > 10} \gamma \textrm{hotelID}; \textrm{COUNT}(*) \to \textrm{noReviews} \textrm{(Review)}$
+
+%
+% EX8
+%
 \subsection{EX8 - Finding all hotels with overall rating and cleanliness}
 $\Pi_{\textrm{hotelID}, \textrm{avgOverall}, \textrm{avgCleanliness}}\sigma_{\textrm{avgOverall} > 3 \textrm{ and } \textrm{avgCleanliness} \geq 5} \gamma \textrm{hotelID}; \textrm{AVG(overall)} \to \textrm{avgOverall},  \textrm{AVG(cleanliness)} \to \textrm{avgCleanliness} \textrm{(Review)}$
 
 \section{SQL}
+
+%
+% EX9
+%
 \subsection{EX9 - Creating HotelReviews Table}
 \begin{lstlisting}[language=SQL, style=default]
 CREATE TABLE HotelReviews (
@@ -125,6 +158,7 @@ CREATE TABLE HotelReviews (
   businessService INTEGER,
   checkIn INTEGER,
   cleanliness INTEGER,
+  location INTEGER,
   rooms INTEGER,
   service INTEGER,
   value INTEGER,
@@ -134,6 +168,10 @@ CREATE TABLE HotelReviews (
 \end{lstlisting}
 Please note, I have deliberately avoided using \texttt{AUTOINCREMENT} on the ``reviewID'' column.
 This is because the SQLite documentation specifically recommends not using this keyword as it ``should be avoided if not strictly needed''.
+
+%
+% EX10
+%
 \subsection{EX10 - Creating a SQL insert script}
 Please see Appendix \ref{appendix:unix_code_sh} and \ref{appendix:unix_code_awk} for the Unix code (note the script is split into 2 sections.
 The first, generatesql.sh, the second generatesql.awk.
@@ -143,6 +181,9 @@ As awk supports record/field processing, it was just the case of getting it to c
 Once it could identity the records, processing the fields was as simple as looping through the fields, stripping the tags and building a 2D array.
 Finally, once the data was put into the 2D array, it then loops back over the data and creates the insert statement.
 
+%
+% EX11
+%
 \subsection{EX11 - Creating Normalised Tables}
 \begin{lstlisting}[language=SQL, style=default]
 CREATE TABLE Hotels (
@@ -161,6 +202,7 @@ CREATE TABLE Reviews (
   businessService INTEGER,
   checkIn INTEGER,
   cleanliness INTEGER,
+  location INTEGER,
   rooms INTEGER,
   service INTEGER,
   value INTEGER,
@@ -169,6 +211,10 @@ CREATE TABLE Reviews (
   FOREIGN KEY (hotelID) REFERENCES Hotels(hotelID)
 );
 \end{lstlisting}
+
+%
+% EX12
+%
 \subsection{EX12 - Populating Normalised Tables} 
 \begin{lstlisting}[language=SQL, style=default]
 INSERT INTO Hotels
@@ -181,13 +227,27 @@ By grouping by ``hotelID'', this prevents duplicate inserts.
 
 \begin{lstlisting}[language=SQL, style=default]
 INSERT INTO Reviews
-(author, reviewDate, hotelID, content, overall, businessService, checkIn, cleanliness, rooms, service, value, noReaders, noHelpful)
-SELECT author, reviewDate, hotelID, content, overall, businessService, checkIn, cleanliness, rooms, service, value, noReaders, noHelpful
+(author, reviewDate, hotelID, content, overall, businessService, checkIn, cleanliness, location, rooms, service, value, noReaders, noHelpful)
+SELECT author, reviewDate, hotelID, content, overall, businessService, checkIn, cleanliness, location, rooms, service, value, noReaders, noHelpful
 FROM HotelReviews;
 \end{lstlisting}
+
+%
+% EX13
+%
 \subsection{EX13 - Creating Indexes}
+\begin{lstlisting}[language=SQL, style=default]
+CREATE INDEX hotelID ON Reviews(hotelID);
+CREATE INDEX author on Reviews(author);
+CREATE INDEX params on Reviews(overall, businessService, checkIn, location, rooms, service, value);
+\end{lstlisting}
+
 
 \section{Data Retrieval and Analysis}
+
+%
+% EX14
+%
 \subsection{EX14 - Relational Algebra to SQL}
 \subsubsection{EX5 - Finding a user's reviews}
 \begin{lstlisting}[language=SQL, style=default]
