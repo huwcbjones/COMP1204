@@ -66,9 +66,10 @@ HotelReview(
   AveragePrice:+textbf[Integer],          Content:+textbf[String],
   Overall:+textbf[Integer],               OverallRating:+textbf[Integer],
   BusinessService:+textbf[Integer],       CheckIn:+textbf[Integer],
-  Cleanliness:+textbf[Integer],           Rooms:+textbf[Integer],
-  Service:+textbf[Integer],               Value:+textbf[Integer],
-  NoReaders:+textbf[Integer],             NoHelpful:+textbf[Integer]
+  Cleanliness:+textbf[Integer],           Location:+textbf[Integer],
+  Rooms:+textbf[Integer],                 Service:+textbf[Integer],
+  Value:+textbf[Integer],                 NoReaders:+textbf[Integer],
+  NoHelpful:+textbf[Integer]
 )
 \end{Verbatim}
 
@@ -78,8 +79,8 @@ HotelReview(
 \subsection{EX2 - Functional Dependencies}
 \begin{tabular}{l l l c l l l l}
 Author & Date & HotelName & $\to$ & Content & OverallRating & BusinessService & CheckIn \\
-&&&& Cleanliness & Rooms & Service & Value \\
-&&&& NoReaders & NoHelpful & & \\
+&&&& Cleanliness & Location & Rooms & Service \\
+&&&& Value & NoReaders & NoHelpful & \\
 HotelID & & & $\to$ & URL & Overall & AveragePrice & \\
 \end{tabular}
 
@@ -239,9 +240,15 @@ FROM HotelReviews;
 \begin{lstlisting}[language=SQL, style=default]
 CREATE INDEX hotelID ON Reviews(hotelID);
 CREATE INDEX author on Reviews(author);
-CREATE INDEX params on Reviews(overall, businessService, checkIn, location, rooms, service, value);
 \end{lstlisting}
+Index ``hotelID'' was chosen because it is the Foreign Key constraint field.
+In order to speed up queries that use this constraint, this field needs to be indexed.
 
+Index ``author'' was chosen because many queries will most likely use the ``author'' field.
+Indexing this column speeds to operations.
+
+Using \texttt{.timer on}, I timed how long it took to execute each query with and without the index.
+With the index, operations were about 25\% quicker.
 
 \section{Data Retrieval and Analysis}
 
@@ -278,6 +285,13 @@ HAVING AVG(overall) > 3 AND AVG(cleanliness) >= 5;
 \end{lstlisting}
 
 \section{Conclusions}
+Overall, the I felt I did not struggle much with the coursework.
+It took some reasonable thought as to how to make the \texttt{generatesql.sh} script as efficient as possible.
+I decided that I would try to limit the amount of programs I called and stick to as few environments as possible.
+Overall, this made my script execute very quickly (for processing $\approx$ 150MB of review data).
+
+Due to my understanding of SQL vs Relational Algebra, I completed EX14 and then reverse engineered the queries back to relational algebra.
+I found this method o f producing relational algebra much more efficient and pleasing as I understood more what the queries were doing. 
 
 \begin{appendices}
 \section{Unix Code}
