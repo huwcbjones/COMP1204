@@ -11,15 +11,16 @@
 \usepackage{pdfpages}
 \usepackage{fancyvrb}
 \usepackage{amsmath}
+\usepackage[toc,page]{appendix}
 
 \definecolor{col_light_grey}{rgb}{0.9, 0.9, 0.9}
 \definecolor{col_green}{rgb}{0,0.6,0}
 \definecolor{col_grey}{rgb}{0.5,0.5,0.5}
 \definecolor{col_mauve}{rgb}{0.58,0,0.82}
 
-\lstset{
-  escapeinside={\%*}{*}
-}
+% \lstset{
+%   escapeinside={\%*}{*}
+% }
 \lstdefinestyle{default}{
   backgroundcolor=\color{col_light_grey},
   basicstyle=\footnotesize,
@@ -28,8 +29,7 @@
   commentstyle=\color{col_green},
   keywordstyle=\color{blue},
   stringstyle=\color{col_mauve},
-  tabsize=2,
-  mathescape
+  tabsize=2
 }
 \lstset{language=bash}
 
@@ -57,8 +57,9 @@
 \subsection{EX1 - Relation}
 \begin{Verbatim}[commandchars=+\[\]]
 HotelReview(
-  +underline[Author:+textbf[String]],                 +underline[Date:+textbf[Date]],
-  +underline[HotelID:+textbf[Integer]],              URL:+textbf[String],
+  +underline[ReviewID:+textbf[Integer]],
+  Author:+textbf[String],                 Date:+textbf[Date],
+  HotelID:+textbf[Integer],               URL:+textbf[String],
   AveragePrice:+textbf[Integer],          Content:+textbf[String],
   Overall:+textbf[Integer],               OverallRating:+textbf[Integer],
   BusinessService:+textbf[Integer],       CheckIn:+textbf[Integer],
@@ -80,18 +81,17 @@ HotelID & & & $\to$ & URL & Overall & AveragePrice & \\
 \begin{Verbatim}[commandchars=+\[\]]
 Hotel(
   +underline[HotelID:+textbf[Integer]],
-  HotelName:+textbf[String],
   URL:+textbf[String],
-  Overall:+textbf[Integer],
+  OverallRating:+textbf[Integer],
   AveragePrice:+textbf[Integer]
 )
 Review(
-  +underline[ReviewID:}textbf[Integer]],
+  +underline[ReviewID:+textbf[Integer]],
   Author:+textbf[String],
   Date:+textbf[Date],
   HotelID:+textbf[Integer],
   Content:+textbf[String],
-  OverallRating:+textbf[Integer],
+  Overall:+textbf[Integer],
   BusinessService:+textbf[Integer],
   CheckIn:+textbf[Integer],
   Cleanliness:+textbf[Integer],
@@ -102,17 +102,50 @@ Review(
   NoHelpful:+textbf[Integer]
 )
 \end{Verbatim}
+
 \subsection{EX4 - ERD Model}
+\begin{center}
+\def\svgwidth{\columnwidth}
+\input{ERD_Diagram.pdf_tex}
+\end{center}
 
 \section{Relation Algebra}
 \subsection{EX5 - Finding a user's reviews}
+$\sigma_{Author=X}(Review)$
 \subsection{EX6 - Finding users with more than two reviews}
+$\sigma_{}(Review)$
 \subsection{EX7 - Finding all hotels with more than 10 reviews}
 \subsection{EX8 - Finding all hotels with overall rating and cleanliness}
 
 \section{SQL}
 \subsection{EX9 - Creating HotelReviews Table}
+\begin{lstlisting}[language=SQL, style=default]
+CREATE TABLE HotelReviews (
+  reviewID INTEGER PRIMARY KEY,
+  author VARCHAR(256) NOT NULL,
+  reviewDate DATE NOT NULL,
+  hotelID INTEGER NOT NULL,
+  URL VARCHAR(256),
+  averagePrice INTEGER,
+  content TEXT,
+  overall INTEGER NOT NULL,
+  overallRating INTEGER NOT NULL,
+  businessService INTEGER,
+  checkIn INTEGER,
+  cleanliness INTEGER,
+  rooms INTEGER,
+  service INTEGER,
+  value INTEGER,
+  noReaders INTEGER NOT NULL DEFAULT 0,
+  noHelpful INTEGER NOT NULL DEFAULT 0
+);
+\end{lstlisting}
+Please note, I have deliberately avoided using \texttt{AUTOINCREMENT} on the ``reviewID'' column.
+This is because the SQLite documentation specifically recommends not using this keyword as it ``should be avoided if not strictly needed''.
 \subsection{EX10 - Creating a SQL insert script}
+Please see Appendix \ref{appendix:unix_code} for the Unix code.
+I chose to implement my script mainly in awk.
+As awk supports record/field processing, it was just the case of getting it to correctly identify the records and fields.
 \subsection{EX11 - Creating Normalised Tables}
 \subsection{EX12 - Populating Normalised Tables}
 \subsection{EX13 - Creating Indexes}
@@ -122,5 +155,13 @@ Review(
 
 \section{Conclusions}
 
+\begin{appendices}
+\section{Unix Code}
+\label{unix_code}
+\subsection{generatesql.sh}
+\lstinputlisting[style=default, language=bash]{generatesql.sh}
+\subsection{generatesql.awk}
+\lstinputlisting[style=default, language=awk]{generatesql.awk}
+\end{appendices}
 
 \end{document}
