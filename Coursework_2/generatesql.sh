@@ -11,7 +11,7 @@ fi
 # * @param $1 Hotel File name
 # **
 function getHotelID() {
-	echo $1 | sed -e 's:^.*\/hotel_::' -e 's:.dat::'
+	echo "$1" | sed -e 's:^.*\/::' -e 's:.dat::' -e 's:hotel_::'
 }
 
 # **
@@ -19,14 +19,15 @@ function getHotelID() {
 # **
 function createTable() {
 	echo "PRAGMA encoding = \"UTF-8\";"
-	echo "DROP TABLE HotelReviews;"
+	echo "DROP TABLE IF EXISTS HotelReviews;"
 	echo "CREATE TABLE HotelReviews ("
 	echo "  reviewID INTEGER PRIMARY KEY,"
 	echo "  author VARCHAR(256) NOT NULL,"
 	echo "  reviewDate DATE NOT NULL,"
 	echo "  hotelID INTEGER NOT NULL,"
 	echo "  URL VARCHAR(256),"
-	echo "  averagePrice INTEGER NOT NULL,"
+	echo "  averagePrice INTEGER,"
+	echo "  content TEXT,"
 	echo "  overall INTEGER NOT NULL,"
 	echo "  overallRating INTEGER NOT NULL,"
 	echo "  businessService INTEGER,"
@@ -47,12 +48,27 @@ function createTable() {
 # **
 function processHotel() {
 	hotelID=$(getHotelID $1)
-	overallRating=$(getField $1 '<Overall Rating>')
-	averagePrice=$(getField $1 '<Avg. Price>\$')
-	URL=$(getField $1 '<URL>')
-	file=$(sed -e "s:\r\n:\n:" -e "s:\r:\n:" $1)
-	echo -e "$file"	| awk \
+	tr -d '\r' < $1 | awk \
 		-v hotelID="$hotelID" -E generatesql.awk
+}
+
+# **
+# * Prints out a progress bar
+# *
+# * @param $1 Current iteration number
+# * @param $2 Number of iterations
+# **
+function printProgress() {
+	awk '
+	BEGIN {
+		percentage = ( '$1' / '$2');
+		numberHashes = ( percentage * 50 );
+		hashString = "";
+		for(i = 1; i < numberHashes; i++){
+			hashString = hashString "#";
+		}
+		printf("\rProgress [%-50s] (%.2f%)", hashString, ( percentage * 100 ));
+	}'
 }
 
 # **
@@ -65,13 +81,24 @@ function getField() {
 	grep "$2" $1 | sed -e "s:$2::"
 }
 
+# Create the table
 echo "$(createTable)" > hotelreviews.sql
+
+# If the file is a directory, then iterate over the directory
 if [ -d $1 ]
 then
+	fileCount=$(ls -l $1 | wc -l)
+	counter=0
 	for f in $1/*
 	do
 		echo "$(processHotel $f)" >> hotelreviews.sql
+		counter=$((counter+1))
+		printProgress $counter $fileCount
 	done
+	printProgress $fileCount $fileCount
 else
-	echo -e "$(processHotel $1)" 
+	# Otherwise process one file (useful for testing files that break the script)
+	echo -e "$(processHotel $1)" >> hotelreviews.sql
 fi
+
+echo -ne "\n"
