@@ -1,7 +1,7 @@
 \documentclass[a4paper]{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.5in]{geometry}
 \usepackage[bookmarks]{hyperref}
 \usepackage{graphicx}
 \usepackage{listings}
@@ -52,7 +52,6 @@
 
 \begin{document}
 \maketitle
-
 \section{ERD and Normalisation}
 \subsection{EX1 - Relation}
 \begin{Verbatim}[commandchars=+\[\]]
@@ -80,42 +79,35 @@ HotelID & & & $\to$ & URL & Overall & AveragePrice & \\
 \subsection{EX3 - Normalised Relations}
 \begin{Verbatim}[commandchars=+\[\]]
 Hotel(
-  +underline[HotelID:+textbf[Integer]],
-  URL:+textbf[String],
-  OverallRating:+textbf[Integer],
-  AveragePrice:+textbf[Integer]
+  +underline[HotelID:+textbf[Integer]],               URL:+textbf[String],
+  OverallRating:+textbf[Integer],         AveragePrice:+textbf[Integer]
 )
 Review(
-  +underline[ReviewID:+textbf[Integer]],
-  Author:+textbf[String],
-  Date:+textbf[Date],
-  HotelID:+textbf[Integer],
-  Content:+textbf[String],
-  Overall:+textbf[Integer],
-  BusinessService:+textbf[Integer],
-  CheckIn:+textbf[Integer],
-  Cleanliness:+textbf[Integer],
-  Rooms:+textbf[Integer],
-  Service:+textbf[Integer],
-  Value:+textbf[Integer],
-  NoReaders:+textbf[Integer],
-  NoHelpful:+textbf[Integer]
+  +underline[ReviewID:+textbf[Integer]],              Author:+textbf[String],
+  Date:+textbf[Date],                     HotelID:+textbf[Integer],
+  Content:+textbf[String],                Overall:+textbf[Integer],
+  BusinessService:+textbf[Integer],       CheckIn:+textbf[Integer],
+  Cleanliness:+textbf[Integer],           Rooms:+textbf[Integer],
+  Service:+textbf[Integer],               Value:+textbf[Integer],
+  NoReaders:+textbf[Integer],             NoHelpful:+textbf[Integer]
 )
 \end{Verbatim}
 
 \subsection{EX4 - ERD Model}
 \begin{center}
-\def\svgwidth{\columnwidth}
+\def\svgwidth{0.4 \columnwidth}
 \input{ERD_Diagram.pdf_tex}
 \end{center}
 
 \section{Relation Algebra}
 \subsection{EX5 - Finding a user's reviews}
-$\sigma_{Author=X}(Review)$
+$\sigma_{\textrm{author}=X} \textrm{(Review)}$
 \subsection{EX6 - Finding users with more than two reviews}
-$\sigma_{}(Review)$
+$\Pi_{\textrm{author}, \textrm{noReviews}}\sigma_{\textrm{noReviews} > 2} \gamma \textrm{author}; \textrm{COUNT}(*) \to \textrm{noReviews} \textrm{(Review)}$
 \subsection{EX7 - Finding all hotels with more than 10 reviews}
+$\Pi_{\textrm{hotelID}, \textrm{noReviews}}\sigma_{\textrm{noReviews} > 10} \gamma \textrm{hotelID}; \textrm{COUNT}(*) \to \textrm{noReviews} \textrm{(Review)}$
 \subsection{EX8 - Finding all hotels with overall rating and cleanliness}
+$\Pi_{\textrm{hotelID}, \textrm{avgOverall}, \textrm{avgCleanliness}}\sigma_{\textrm{avgOverall} > 3 \textrm{ and } \textrm{avgCleanliness} \geq 5} \gamma \textrm{hotelID}; \textrm{AVG(overall)} \to \textrm{avgOverall},  \textrm{AVG(cleanliness)} \to \textrm{avgCleanliness} \textrm{(Review)}$
 
 \section{SQL}
 \subsection{EX9 - Creating HotelReviews Table}
@@ -143,25 +135,98 @@ CREATE TABLE HotelReviews (
 Please note, I have deliberately avoided using \texttt{AUTOINCREMENT} on the ``reviewID'' column.
 This is because the SQLite documentation specifically recommends not using this keyword as it ``should be avoided if not strictly needed''.
 \subsection{EX10 - Creating a SQL insert script}
-Please see Appendix \ref{appendix:unix_code} for the Unix code.
+Please see Appendix \ref{appendix:unix_code_sh} and \ref{appendix:unix_code_awk} for the Unix code (note the script is split into 2 sections.
+The first, generatesql.sh, the second generatesql.awk.
+This was done as lstlisting had trouble syntax highlighting the big awk script in a bash script.)
 I chose to implement my script mainly in awk.
 As awk supports record/field processing, it was just the case of getting it to correctly identify the records and fields.
+Once it could identity the records, processing the fields was as simple as looping through the fields, stripping the tags and building a 2D array.
+Finally, once the data was put into the 2D array, it then loops back over the data and creates the insert statement.
+
 \subsection{EX11 - Creating Normalised Tables}
-\subsection{EX12 - Populating Normalised Tables}
+\begin{lstlisting}[language=SQL, style=default]
+CREATE TABLE Hotels (
+  hotelID INTEGER PRIMARY KEY,
+  URL VARCHAR(256) NOT NULL,
+  overallRating INTEGER NOT NULL,
+  averagePrice INTEGER
+);
+CREATE TABLE Reviews (
+  reviewID INTEGER PRIMARY KEY,
+  author VARCHAR(256) NOT NULL,
+  reviewDate DATE NOT NULL,
+  hotelID INTEGER NOT NULL,
+  content TEXT,
+  overall INTEGER NOT NULL,
+  businessService INTEGER,
+  checkIn INTEGER,
+  cleanliness INTEGER,
+  rooms INTEGER,
+  service INTEGER,
+  value INTEGER,
+  noReaders INTEGER NOT NULL DEFAULT 0,
+  noHelpful INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (hotelID) REFERENCES Hotels(hotelID)
+);
+\end{lstlisting}
+\subsection{EX12 - Populating Normalised Tables} 
+\begin{lstlisting}[language=SQL, style=default]
+INSERT INTO Hotels
+(hotelID, URL, overallRating, averagePrice)
+SELECT hotelID, URL, overallRating, averagePrice
+FROM HotelReviews
+GROUP BY hotelID;
+\end{lstlisting}
+By grouping by ``hotelID'', this prevents duplicate inserts.
+
+\begin{lstlisting}[language=SQL, style=default]
+INSERT INTO Reviews
+(author, reviewDate, hotelID, content, overall, businessService, checkIn, cleanliness, rooms, service, value, noReaders, noHelpful)
+SELECT author, reviewDate, hotelID, content, overall, businessService, checkIn, cleanliness, rooms, service, value, noReaders, noHelpful
+FROM HotelReviews;
+\end{lstlisting}
 \subsection{EX13 - Creating Indexes}
 
 \section{Data Retrieval and Analysis}
 \subsection{EX14 - Relational Algebra to SQL}
+\subsubsection{EX5 - Finding a user's reviews}
+\begin{lstlisting}[language=SQL, style=default]
+SELECT * FROM Reviews WHERE author=?;
+\end{lstlisting}
+
+\subsubsection{EX6 - Finding users with more than two reviews}
+\begin{lstlisting}[language=SQL, style=default]
+SELECT author, COUNT(*) as noReviews
+FROM Reviews
+GROUP BY author
+HAVING noReviews > 2;
+\end{lstlisting}
+
+\subsubsection{EX7 - Finding all hotels with more than 10 reviews}
+\begin{lstlisting}[language=SQL, style=default]
+SELECT hotelID, COUNT(*) as noReviews
+FROM Reviews
+GROUP BY hotelID
+HAVING noReviews > 10;
+\end{lstlisting}
+\subsubsection{EX8 - Finding all hotels with overall rating and cleanliness}
+\begin{lstlisting}[language=SQL, style=default]
+SELECT hotelID
+FROM Reviews
+GROUP BY hotelID
+HAVING AVG(overall) > 3 AND AVG(cleanliness) >= 5;
+\end{lstlisting}
 
 \section{Conclusions}
 
 \begin{appendices}
 \section{Unix Code}
-\label{unix_code}
 \subsection{generatesql.sh}
-\lstinputlisting[style=default, language=bash]{generatesql.sh}
+\label{appendix:unix_code_sh}
+\lstinputlisting[style=default, language=bash]{scripts/generatesql.sh}
 \subsection{generatesql.awk}
-\lstinputlisting[style=default, language=awk]{generatesql.awk}
+\label{appendix:unix_code_awk}
+\lstinputlisting[style=default, language=awk]{scripts/generatesql.awk}
 \end{appendices}
 
 \end{document}
