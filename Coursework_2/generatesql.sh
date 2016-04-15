@@ -28,6 +28,7 @@ function createTable() {
 	echo "  businessService INTEGER,"
 	echo "  checkIn INTEGER,"
 	echo "  cleanliness INTEGER,"
+	echo "  location INTEGER,"
 	echo "  rooms INTEGER,"
 	echo "  service INTEGER,"
 	echo "  value INTEGER,"
@@ -80,7 +81,7 @@ function processHotel() {
 		# Formats the record into a SQL insert statement
 		# @param rowNumber Row (record) number of the row to format
 		function formatRow(rowNumber){
-			insert = "INSERT INTO HotelReviews (author, reviewDate, hotelID, URL, averagePrice, overallRating, content, overall, businessService, checkIn, cleanliness, rooms, service, value, noReaders, noHelpful) VALUES (";
+			insert = "INSERT INTO HotelReviews (author, reviewDate, hotelID, URL, averagePrice, overallRating, content, overall, businessService, checkIn, cleanliness, location, rooms, service, value, noReaders, noHelpful) VALUES (";
 			insert = insert "\"" data[rowNumber]["author"]"\", ";
 			insert = insert data[rowNumber]["date"] ", ";
 			insert = insert hotelID ", ";
@@ -92,6 +93,7 @@ function processHotel() {
 			insert = insert nullCheck(data[rowNumber]["business"]) ", ";
 			insert = insert nullCheck(data[rowNumber]["checkin"]) ", ";
 			insert = insert nullCheck(data[rowNumber]["cleanliness"]) ", ";
+			insert = insert nullCheck(data[rowNumber]["location"]) ", ";
 			insert = insert nullCheck(data[rowNumber]["rooms"]) ", ";
 			insert = insert nullCheck(data[rowNumber]["service"]) ", ";
 			insert = insert nullCheck(data[rowNumber]["value"]) ", ";
@@ -148,6 +150,9 @@ function processHotel() {
 				} else if(match($i, "<Cleanliness>")){		# Cleanliness
 					sub(/<Cleanliness>/, "", $i);
 					data[recordNum]["cleanliness"] = $i;
+				} else if(match($i, "<Location>")){			# Location
+					sub(/<Location>/, "", $i);
+					data[recordNum]["location"] = $i;
 				} else if(match($i, "<Rooms>")){			# Rooms
 					sub(/<Rooms>/, "", $i);
 					data[recordNum]["rooms"] = $i;

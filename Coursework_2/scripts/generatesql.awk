@@ -35,7 +35,7 @@ function escapeField(field){
 # Formats the record into a SQL insert statement
 # @param rowNumber Row (record) number of the row to format
 function formatRow(rowNumber){
-	insert = "INSERT INTO HotelReviews (author, reviewDate, hotelID, URL, averagePrice, overallRating, content, overall, businessService, checkIn, cleanliness, rooms, service, value, noReaders, noHelpful) VALUES (";
+	insert = "INSERT INTO HotelReviews (author, reviewDate, hotelID, URL, averagePrice, overallRating, content, overall, businessService, checkIn, cleanliness, location, rooms, service, value, noReaders, noHelpful) VALUES (";
 	insert = insert "\"" data[rowNumber]["author"]"\", ";
 	insert = insert data[rowNumber]["date"] ", ";
 	insert = insert hotelID ", ";
@@ -47,6 +47,7 @@ function formatRow(rowNumber){
 	insert = insert nullCheck(data[rowNumber]["business"]) ", ";
 	insert = insert nullCheck(data[rowNumber]["checkin"]) ", ";
 	insert = insert nullCheck(data[rowNumber]["cleanliness"]) ", ";
+	insert = insert nullCheck(data[rowNumber]["location"]) ", ";
 	insert = insert nullCheck(data[rowNumber]["rooms"]) ", ";
 	insert = insert nullCheck(data[rowNumber]["service"]) ", ";
 	insert = insert nullCheck(data[rowNumber]["value"]) ", ";
@@ -103,6 +104,9 @@ function formatRow(rowNumber){
 		} else if(match($i, "<Cleanliness>")){		# Cleanliness
 			sub(/<Cleanliness>/, "", $i);
 			data[recordNum]["cleanliness"] = $i;
+		} else if(match($i, "<Location>")){			# Location
+			sub(/<Location>/, "", $i);
+			data[recordNum]["location"] = $i;
 		} else if(match($i, "<Rooms>")){			# Rooms
 			sub(/<Rooms>/, "", $i);
 			data[recordNum]["rooms"] = $i;

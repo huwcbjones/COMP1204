@@ -28,6 +28,7 @@ function createTable() {
 	echo "  businessService INTEGER,"
 	echo "  checkIn INTEGER,"
 	echo "  cleanliness INTEGER,"
+	echo "  location INTEGER,"
 	echo "  rooms INTEGER,"
 	echo "  service INTEGER,"
 	echo "  value INTEGER,"
