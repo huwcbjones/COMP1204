@@ -43,7 +43,7 @@ function createTable() {
 function processHotel() {
 	hotelID=$(getHotelID $1)
 	tr -d '\r' < $1 | awk \
-		-v hotelID="$hotelID" -E generate_sh.awk
+		-v hotelID="$hotelID" --exec=generatesql.awk
 }
 
 # Prints out a progress bar
